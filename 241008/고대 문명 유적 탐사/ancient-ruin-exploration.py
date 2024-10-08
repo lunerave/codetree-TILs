@@ -141,6 +141,9 @@ for _ in range(k):
     angle = answers[0][1]
     flag = 0
 
+    if answers[0][0] == 0:
+        break
+
     if angle == 90:
         rotated = rotate90(index[0], index[1], 3)
         answer += bfs_and_break()
