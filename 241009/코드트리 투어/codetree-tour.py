@@ -5,9 +5,6 @@ Q = int(input())
 def dijk(start, n, dest): 
     distance = [2**31]*n 
 
-    if start == dest:
-        
-
     distance[start] = 0
 
     q = []
