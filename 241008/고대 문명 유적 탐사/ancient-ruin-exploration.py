@@ -116,74 +116,77 @@ def bfs_and_break():
                         rotated[tx][ty] = 0
     return temp
 
-        
-answers = []
+for _ in range(k):     
+    answers = []
 
-for i in range(1, 4):
-    for j in range(1, 4):
-        rotated = rotate90(i, j, 3)
-        rotated_result = bfs(rotated)
-        answers.append([rotated_result, 90, i, j])
+    for i in range(1, 4):
+        for j in range(1, 4):
+            rotated = rotate90(i, j, 3)
+            rotated_result = bfs(rotated)
+            answers.append([rotated_result, 90, i, j])
 
-        rotated = rotate180(i, j, 3)
-        rotated_result = bfs(rotated)
-        answers.append([rotated_result, 180, i, j])
-        
-        rotated = oprotate90(i, j, 3)
-        rotated_result = bfs(rotated)
-        answers.append([rotated_result, 270, i, j])
+            rotated = rotate180(i, j, 3)
+            rotated_result = bfs(rotated)
+            answers.append([rotated_result, 180, i, j])
+            
+            rotated = oprotate90(i, j, 3)
+            rotated_result = bfs(rotated)
+            answers.append([rotated_result, 270, i, j])
 
-answers.sort(key=lambda x: (-x[0], x[1], x[3], x[2]))
+    answers.sort(key=lambda x: (-x[0], x[1], x[3], x[2]))
 
-answer = 0
-index = answers[0][2], answers[0][3]
-angle = answers[0][1]
-flag = 0
+    answer = 0
+    index = answers[0][2], answers[0][3]
+    angle = answers[0][1]
+    flag = 0
 
-if angle == 90:
-    rotated = rotate90(index[0], index[1], 3)
-    answer += bfs_and_break()
-    while True:
-        for i in range(5):
-            for j in range(4, -1, -1):
-                if saved_pieces and rotated[j][i] == 0:
-                    rotated[j][i] = saved_pieces.popleft()
-                if not saved_pieces:
-                    flag = 1
-        
-        temp = bfs_and_break()
-        answer += temp
-        if temp == 0 or flag == 1:
-            break
-elif angle == 180:
-    rotated = rotate180(index[0], index[1], 3)
-    answer += bfs_and_break()
-    while True:
-        for i in range(5):
-            for j in range(4, -1, -1):
-                if saved_pieces and rotated[j][i] == 0:
-                    rotated[j][i] = saved_pieces.popleft()
-                if not saved_pieces:
-                    flag = 1
-        
-        temp = bfs_and_break()
-        answer += temp
-        if temp == 0 or flag == 1:
-            break
-elif angle == 270:
-    rotated = oprotate90(index[0], index[1], 3)
-    answer += bfs_and_break()
-    while True:
-        for i in range(5):
-            for j in range(4, -1, -1):
-                if saved_pieces and rotated[j][i] == 0:
-                    rotated[j][i] = saved_pieces.popleft()
-                if not saved_pieces:
-                    flag = 1
-        
-        temp = bfs_and_break()
-        answer += temp
-        if temp == 0 or flag == 1:
-            break
+    if angle == 90:
+        rotated = rotate90(index[0], index[1], 3)
+        answer += bfs_and_break()
+        while True:
+            for i in range(5):
+                for j in range(4, -1, -1):
+                    if saved_pieces and rotated[j][i] == 0:
+                        rotated[j][i] = saved_pieces.popleft()
+                    if not saved_pieces:
+                        flag = 1
+            
+            temp = bfs_and_break()
+            answer += temp
+            if temp == 0 or flag == 1:
+                break
+    elif angle == 180:
+        rotated = rotate180(index[0], index[1], 3)
+        answer += bfs_and_break()
+        while True:
+            for i in range(5):
+                for j in range(4, -1, -1):
+                    if saved_pieces and rotated[j][i] == 0:
+                        rotated[j][i] = saved_pieces.popleft()
+                    if not saved_pieces:
+                        flag = 1
+            
+            temp = bfs_and_break()
+            answer += temp
+            if temp == 0 or flag == 1:
+                break
+    elif angle == 270:
+        rotated = oprotate90(index[0], index[1], 3)
+        answer += bfs_and_break()
+        while True:
+            for i in range(5):
+                for j in range(4, -1, -1):
+                    if saved_pieces and rotated[j][i] == 0:
+                        rotated[j][i] = saved_pieces.popleft()
+                    if not saved_pieces:
+                        flag = 1
+            
+            temp = bfs_and_break()
+            answer += temp
+            if temp == 0 or flag == 1:
+                break
+    
+    maps = copy.deepcopy(rotated)
 
-print(answer)
+    if(answer != 0):
+        print(answer)
