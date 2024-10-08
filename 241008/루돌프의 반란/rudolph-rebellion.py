@@ -1,220 +1,206 @@
-n, m, p, c, d = map(int, input().split())
+def cal_dist(r1, c1, r2, c2):
+    return abs(r1 - r2) ** 2 + abs(c1 - c2) ** 2
 
-maps = [[0]*n for _ in range(n)]
 
-rudolfx, rudolfy = map(int, input().split())
+def in_range(x, y):
+    return 0 <= x < n and 0 <= y < n
 
-rudolfx -= 1
-rudolfy -= 1
+dx=[-1,-1,0,1,1, 1, 0,-1]
+dy=[0 ,1 ,1,1,0,-1,-1,-1]
+def roodolf_move(rounds):
+    # 가장가까운 산타를 향해 1칸 돌진.
+    # 산타가 둘이상이면 r좌표큰, 동일하면 c좌표큰
+    # 상하좌우,대각선 포함해서 8방향.
+    global rr,rc
+    min_dist = 100000
+    mr,mc = 10000,10000
+    mnum= -1
+    #산타 값 전부조회
+    for num in range(1,p+1):
+        sr,sc = s_where[num]
+        if sr == -100 : continue
+        dist = cal_dist(sr,sc,rr,rc)
+        if (min_dist,-mr,-mc) >= (dist,-sr,-sc) : # 여기서 오류나면 그냥 for문으로 2차원배열 탐색으로 하기
+            min_dist = dist 
+            mr,mc = sr,sc
+            mnum = num
+    #print(mr,mc,mnum)
 
-maps[rudolfx][rudolfy] = -1
+    r_dist = cal_dist(mr,mc,rr,rc)
 
-santa = [[] for _ in range(31)]
-santas = []
-santa_out = []
-santa_stunned = {}
+    for dnum in range(8):
+        nx,ny = rr+dx[dnum],rc+dy[dnum]
+        n_dist = cal_dist(mr,mc,nx,ny)
+        if in_range(nx,ny) and r_dist > n_dist :
+            r_dist = n_dist
+            nr,nc = nx,ny
+            r_num = dnum
 
-dx = [-1, 0, 1, 0, -1, -1, 1, 1]
-dy = [0, 1, 0, -1, -1, 1, 1, -1]
+    #맵 갱신
+    r_map[rr][rc] = 0
+    r_map[nr][nc] = 1
+    rr,rc = nr,nc
+    # 박치기 충돌 구현해야함
 
-for _ in range(p):
-    santa_num, x, y = map(int, input().split())
-    maps[x-1][y-1] = santa_num
-    santas.append([santa_num, x-1, y-1, 0])
+    if s_map[rr][rc] != 0 :
+        #누군가있다면
+        santa = s_map[rr][rc]
+        sx,sy = rr,rc
+        #기절구현 주의
+        break_santa[santa] = rounds + 2
+        #점수구현
+        s_point[santa] += c
+        s_map[rr][rc] = 0
+        #밀려나기 구현
+        nnx,nny = sx+c*dx[r_num],sy+c*dy[r_num]
+        if in_range(nnx,nny): # 밖으로 안 나갈때
+            #만약에 밀려난곳에 산타가 있나 체크해야함
+            s_where[santa] = nnx,nny
+            mnumber = santa
+            while True :
+                if no_santa(nnx,nny) : break
+                nnx,nny,mnumber = push(nnx,nny,mnumber,r_num)
+            # 빠져나오고난다음 mnx,mny 에 자리 넣어줘야함.
+            if in_range(nnx,nny): # 안쪽이면 반영해주기
+                s_map[nnx][nny] = mnumber
+                s_where[mnumber] = nnx,nny
+            else : #밀려서 밖으로 나가면 우주로 ㅂㅂ
+                s_where[mnumber] = -100,-100
+        else :
+            s_map[sx][sy] = 0
+            s_where[santa] = -100, -100
+            return
 
-santas.sort(key = lambda x:x[0])
+    return
 
-def move_to_close_santa(sx, sy, tx, ty):
-    if sx == tx:
-        return (sx, sy+1, 1) if sy < ty else (sx, sy-1, 3)
-    elif sy == ty:
-        return (sx+1, sy, 2) if sx < tx else (sx-1, sy, 0)
-    elif sx < tx and sy < ty:
-        return (sx+1, sy+1, 6)
-    elif sx < tx and sy > ty:
-        return (sx+1, sy-1, 7)
-    elif sx > tx and sy < ty:
-        return (sx-1, sy+1, 5)
-    elif sx < tx and sy > ty:
-        return (sx-1, sy-1, 4)
+def one_san_move(santa,rounds):
+    if not break_santa[santa] <= rounds : return
+    sx,sy = s_where[santa]
+    if sx == -100 : return
+    #루돌프에게 가까워지는 방향으로 1칸
+    # 다른산타, 게임판밖 x
+    # 움직못하면 그냥 가만히
+    # 가까워지지 못하면 그냥 가만히
+    s_dist = cal_dist(sx,sy,rr,rc)
+    mx,my = sx,sy
+    for num in range(0,8,2):
+        nx,ny = sx+dx[num],sy+dy[num]
+        n_dist = cal_dist(nx,ny,rr,rc)
+        if in_range(nx,ny) and s_map[nx][ny] == 0 and  s_dist > n_dist : #상우하좌
+            s_dist = n_dist
+            mx,my = nx,ny
+            mnum = num
 
-def find_close_santa(x, y):
-    res = []
-    for santa in santas:
-        if santa[0] in santa_out:
-            continue
-        temp_res = abs(santa[1]-x)**2 + abs(santa[2]-y)**2
-        res.append([temp_res, santa[1], santa[2]])
-    
-    res.sort(key = lambda x: [x[0], -x[1], -x[2]])
+    # 갱신 및 그림 업데이트
+    s_map[sx][sy] = 0
+    s_where[santa] = mx,my
+    s_map[mx][my] = santa
+    # 루돌프와 부딫힘 체크
+    if rr == mx and rc == my: #밀려나야함
+        # 점수얻기
+        # d 거리만큼 튕겨나가기
+        s_map[mx][my] = 0
+        r_num = (mnum+4)%8
+        #기절처리 주의
+        break_santa[santa] = rounds + 2
+        #포인트 처리
+        s_point[santa] += d
+        mnx,mny = mx+d*dx[r_num],my+d*dy[r_num]
+        if in_range(mnx,mny): # 밖으로 나갈때
+            #만약에 밀려난곳에 산타가 있나 체크해야함
+            s_where[santa] = mnx,mny
+            mnumber = santa
+            while True :
+                if no_santa(mnx,mny) : break
+                mnx,mny,mnumber = push(mnx,mny,mnumber,r_num)
+            # 빠져나오고난다음 mnx,mny 에 자리 넣어줘야함.
+            if in_range(mnx,mny): # 안쪽이면 반영해주기
+                #print(mnx,mny,mnumber)
+                s_map[mnx][mny] = mnumber
+                s_where[mnumber] = mnx,mny
+            else : #밀려서 밖으로 나가면 우주로 ㅂㅂ
+                s_where[mnumber] = -100,-100
+        else :
+            s_map[mx][my] = 0
+            s_where[santa] = -100, -100
+            return
 
-    return res[0][1], res[0][2]
+    return
 
-def santa_move(sx, sy, rx, ry):
-    res = []
-    for i in range(4):
-        nx = sx + dx[i]
-        ny = sy + dy[i]
+def push(x,y,num,r_num):
 
-        if 0 <= nx < n and 0 <= ny < n and (maps[nx][ny] == 0 or maps[nx][ny] == -1):
-            if maps[nx][ny] == 0:
-                res.append([(abs(nx-rx)**2 + abs(ny-ry)**2), d, nx, ny])
-            else:
-                return nx, ny, i
-    if not res:
-        return sx, sy
-    
-    res.sort(key=lambda x: [x[0], x[1]])
+    mnumber = s_map[x][y]
+    s_where[num] = x,y
+    s_map[x][y] = num
+    mx,my = x+dx[r_num],y+dy[r_num]
+    return mx,my,mnumber
 
-    return res[0][2], res[0][3]
 
-for a in range(m):
-    santa_x, santa_y = find_close_santa(rudolfx, rudolfy)
-    # 루돌프 산타로 이동
-    maps[rudolfx][rudolfy] = 0
-    rudolf = move_to_close_santa(rudolfx, rudolfy, santa_x, santa_y)
-    rudolfx = rudolf[0]
-    rudolfy = rudolf[1]
+def no_santa(mnx,mny):
+    if not in_range(mnx,mny) : return True
+    if s_map[mnx][mny] == 0 :
+        return True
+    return False
 
-    if maps[rudolfx][rudolfy] > 0:
-        santa_stunned[maps[rudolfx][rudolfy]] = a + 1
-        for s in range(p):
-            if santas[s][0] == maps[rudolfx][rudolfy]:
-                santas[s][3] += c
-        direct = rudolf[2]
-        nsx = rudolfx + dx[direct]*c
-        nsy = rudolfy + dy[direct]*c
-        if 0 <= nsx < n and 0 <= nsy < n:
-            if maps[nsx][nsy] == 0:
-                maps[nsx][nsy] = maps[rudolfx][rudolfy]
-                for s in range(p):
-                    if santas[s][0] == maps[nsx][nsy]:
-                        santas[s][1] = nsx
-                        santas[s][2] = nsy
-                        break
-                maps[rudolfx][rudolfy] = -1
-            else:
-                temp_x, temp_y = nsx + dx[direct], nsy + dy[direct]
-                out_flag = 0
-                while True:
-                    if 0 <= temp_x < n and 0 <= temp_y < n: 
-                        if maps[temp_x][temp_y] > 0:
-                            temp_x += dx[direct]
-                            temp_y += dy[direct]
-                        else:
-                            break
-                    else:
-                        out_flag = 1
-                        break
-                
-                if out_flag == 1:
-                    sad_santa = maps[temp_x - dx[direct]][temp_y - dy[direct]]
-                    santa_out.append(sad_santa)
-                
-                while True:
-                    next_x = temp_x - dx[direct]
-                    next_y = temp_y - dy[direct]
-                    for s in range(p):
-                        if santas[s][0] == maps[next_x][next_y]:
-                            santas[s][1] = temp_x
-                            santas[s][2] = temp_y
-                            break
+def santa_move(rounds):
 
-                    maps[temp_x][temp_y] = maps[next_x][next_y]
-                    temp_x = next_x
-                    temp_y = next_y
-                    if temp_x == nsx and temp_y == nsy:
-                        maps[next_x][next_y] = maps[rudolfx][rudolfy]
-                        for s in range(p):
-                            if santas[s][0] == maps[next_x][next_y]:
-                                santas[s][1] = next_x
-                                santas[s][2] = next_y
-                                break
-                        break
-        else:
-            santa_out.append(maps[rudolfx][rudolfy])
-            maps[rudolfx][rudolfy] = -1
-    else:
-        maps[rudolfx][rudolfy] = -1
-            
-    
-    # 산타 이동
-    for i in range(p):
-        # 산타가 이동할 공간
-        santa = santas[i]
-        if santa[0] in santa_out:
-            continue
-        if santa[0] in santa_stunned:
-            if santa_stunned[santa[0]] >= a:
-                continue
-            
-        santa_loc = santa_move(santa[1], santa[2], rudolfx, rudolfy)
-        nsx = santa_loc[0]
-        nsy = santa_loc[1]
-        # 같으면 이동할 공간이 없음
-        if nsx == santa[1] and nsy == santa[2]:
-            continue
-        if len(santa_loc) == 3:
-            santa_stunned[santa[0]] = a + 1
-            direct = santa_loc[2]
-            santas[i][3] += d
-            maps[santa[1]][santa[2]] = 0
-            nsx = nsx - dx[direct]*d
-            nsy = nsy - dy[direct]*d
-            if 0 <= nsx < n and 0 <= nsy < n:
-                if maps[nsx][nsy] == 0:
-                    maps[nsx][nsy] = santa[0]
-                else: # 튕겨서 산타를 만났을 경우
-                    temp_x, temp_y = nsx - dx[direct], nsy - dy[direct]
-                    out_flag = 0
-                    while True:
-                        if 0 <= temp_x < n and 0 <= temp_y < n: 
-                            if maps[temp_x][temp_y] > 0:
-                                temp_x -= dx[direct]
-                                temp_y -= dy[direct]
-                            else:
-                                break
-                        else:
-                            out_flag = 1
-                            break
-                    
-                    if out_flag == 1:
-                        sad_santa = maps[temp_x + dx[direct]][temp_y + dy[direct]]
-                        santa_out.append(sad_santa)
-                    
-                    while True:
-                        next_x = temp_x + dx[direct]
-                        next_y = temp_y + dy[direct]
-                        for s in range(p):
-                            if santas[s][0] == maps[next_x][next_y]:
-                                santas[s][1] = temp_x
-                                santas[s][2] = temp_y
-                                break
+    for santa in range(1,p+1):
+        one_san_move(santa,rounds)
+    return
 
-                        maps[temp_x][temp_y] = maps[next_x][next_y]
-                        temp_x = next_x
-                        temp_y = next_y
-                        if temp_x == nsx and temp_y == nsy:
-                            maps[next_x][next_y] = santa[0]
-                            santas[i][1] = next_x
-                            santas[i][2] = next_y
-                            break
-            else: # 튕겨서 마을 밖으로 나감
-                santa_out.append(santa[0])
-            continue
 
-        maps[santa[1]][santa[2]] = 0
-        maps[nsx][nsy] = santa[0]
-        santas[i][1] = nsx
-        santas[i][2] = nsy
+n,m,p,c,d = map(int,input().split())
+s_point = [0 for _ in range((1+p))]
+s_where = [(-1,-1) for _ in range((1+p))]
+rr,rc = map(int,input().split())
+rr-=1
+rc-=1
+r_map = [ [ 0 for _ in range(n)] for _ in range(n)]
+s_map = [ [ 0 for _ in range(n)] for _ in range(n)]
+r_map[rr][rc] = 1
+break_santa = [0 for _ in range((1+p))]
+for pn in range(p):
+    snum,sr,sc = map(int,input().split())
+    s_where[snum] = (sr-1,sc-1)
+    s_map[sr-1][sc-1] = snum
 
-    for s in range(p):
-        if santas[s][0] not in santa_out:
-            santas[s][3] += 1
+def look_maps():
+    print('산타')
+    for k in s_map:
+        print(*k)
+    print('루돌')
+    for k1 in r_map:
+        print(*k1)
+    return
 
-answer = []
+def output_santa_point():
+    for num in range(1,p+1):
+        print(s_point[num],end=' ')
+    return
 
-for santa in santas:
-    answer.append(santa[3])
 
-print(*answer)
+def santa_dead_check():
+    count = 0
+    for santa in range(1,p+1):
+        sx,sy = s_where[santa]
+        if sx == -100 :
+            count += 1
+
+    return count == p
+def santa_point_up():
+
+    for num in range(1,p+1):
+        sx,sy = s_where[num]
+        if sx == -100 : continue
+        s_point[num] += 1
+    return
+for rounds in range(m):
+    roodolf_move(rounds)
+    #look_maps()
+    if santa_dead_check(): break
+    santa_move(rounds)
+    #look_maps()
+    if santa_dead_check(): break
+    santa_point_up()
+
+output_santa_point()
