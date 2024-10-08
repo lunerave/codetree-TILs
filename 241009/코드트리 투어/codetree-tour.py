@@ -22,11 +22,11 @@ def dijk(start, n, dest):
     return distance[dest]
 
 heap = []
+start = 0
+
 
 for _ in range(Q):
     command = list(map(int, input().split()))
-
-    start = 0
 
     if command[0] == 100:
         n, m = command[1], command[2]
