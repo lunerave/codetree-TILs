@@ -5,7 +5,7 @@ Q = int(input())
 def dijk(start, n, dest): 
     distance = [2**31]*n 
 
-    distance[start] = 0
+    # distance[start] = 0
 
     q = []
 
@@ -43,12 +43,12 @@ for _ in range(Q):
     if command[0] == 200:
         id, least, dest = command[1], command[2], command[3]
 
-        if start == dest:
-            for d, w in nodes[start]:
-                if d == start:
-                    heapq.heappush(heap, [-(least-w), id, least, dest])
-        else:
-            heapq.heappush(heap, [-(least-dijk(start, n, dest)), id, least, dest])
+        # if start == dest:
+        #     for d, w in nodes[start]:
+        #         if d == start:
+        #             heapq.heappush(heap, [-(least-w), id, least, dest])
+        # else:
+        heapq.heappush(heap, [-(least-dijk(start, n, dest)), id, least, dest])
     
     if command[0] == 300:
         target = command[1]
