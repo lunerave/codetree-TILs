@@ -50,6 +50,7 @@ for _ in range(Q):
         for idx, h in enumerate(heap):
             if h[1] == target:
                 heap.remove(heap[idx])
+        heapq.heapify(heap)
     
     if command[0] == 400:
         if heap:
