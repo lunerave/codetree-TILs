@@ -116,6 +116,7 @@ def bfs_and_break():
                         rotated[tx][ty] = 0
     return temp
 
+answer_list = []
 for _ in range(k):     
     answers = []
 
@@ -189,4 +190,6 @@ for _ in range(k):
     maps = copy.deepcopy(rotated)
 
     if(answer != 0):
-        print(answer)
+        answer_list.append(answer)
+
+print(*answer_list)
