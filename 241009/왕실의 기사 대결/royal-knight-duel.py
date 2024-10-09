@@ -22,11 +22,6 @@ origin_hp = [0] * (n+1)
 for i in range(l):
     line = list(map(int, input().split()))
     traps_and_walls.append(line)
-    for j in range(l):
-        if line[j] == 1:
-            traps.add((i, j))
-        if line[j] == 2:
-            walls.add((i, j))
 
 for i in range(1, n+1):
     x, y, h, w, hp = map(int, input().split())
@@ -87,7 +82,7 @@ def move_possible(bodies, direction):
             else:
                 if nights[nx][ny] in save:
                     continue
-                save.append((nights[nx][ny]))    
+                save.append((nights[nx][ny]))   
                 temp.append((nx, ny))
         else:
             return False
@@ -109,7 +104,7 @@ def remove_night(night):
     for x, y in bodies:
         nights[x][y] = 0
         
-for t in range(q):
+for k in range(q):
     night_num, direction = map(int, input().split())
 
     origin_bodies = []
@@ -121,6 +116,7 @@ for t in range(q):
                 break
         if origin_bodies:
             break
+    
 
     if not origin_bodies:
         continue
@@ -128,7 +124,9 @@ for t in range(q):
     save = []
 
     res = move_possible(origin_bodies, direction)
-    
+
+    save.reverse()
+
     if not res:
         continue
 
@@ -141,7 +139,6 @@ for t in range(q):
                     break
             if bodies:
                 break
-        
         for x, y in bodies:
             nights[x][y] = 0
 
@@ -151,6 +148,7 @@ for t in range(q):
 
             nights[nx][ny] = s
             if traps_and_walls[nx][ny] == 1:
+
                 nights_health[s] -= 1
 
     for x, y in origin_bodies:
