@@ -2,14 +2,10 @@ import heapq
 
 Q = int(input())
 
-def dijk(start, n, dest): 
-    distance = [2**31]*n 
-
+def dijkstra(start, n, dest):
+    distance = [float('inf')] * n
     distance[start] = 0
-
-    q = []
-
-    heapq.heappush(q, (0, start))
+    q = [(0, start)]  # (distance, node)
 
     while q:
         c, node = heapq.heappop(q)
@@ -20,13 +16,16 @@ def dijk(start, n, dest):
         for nnode, w in nodes[node]:
             if c + w < distance[nnode]:
                 distance[nnode] = c + w
-                heapq.heappush(q, (c+w, nnode)) 
+                heapq.heappush(q, (c + w, nnode))
     
     return distance[dest]
 
 heap = []
 start = 0
-
+distance_cache = {}  # 캐시를 사용하여 계산된 거리를 저장
+possible, impossible = [], []
+possible_set, impossible_set = set(), set()
+ban = set()
 
 for _ in range(Q):
     command = list(map(int, input().split()))
@@ -37,44 +36,71 @@ for _ in range(Q):
 
         for i in range(3, len(command), 3):
             s = command[i]
-            e = command[i+1]
-            w = command[i+2]
+            e = command[i + 1]
+            w = command[i + 2]
             nodes[s].append((e, w))
             if s != e:
                 nodes[e].append((s, w))
-    
+
     if command[0] == 200:
         id, least, dest = command[1], command[2], command[3]
+        
+        # 만약 dest에 대한 거리 계산이 이미 존재한다면 캐시에서 사용
+        if (start, dest) not in distance_cache:
+            distance_cache[(start, dest)] = dijkstra(start, n, dest)
+        
+        distance = distance_cache[(start, dest)]
+        benefit = least - distance
+        if benefit >= 0:
+            heapq.heappush(possible, (-benefit, id, least, dest))
+            possible_set.add(id)
+        else:
+            heapq.heappush(impossible, (-benefit, id, least, dest))
+            impossible_set.add(id)
 
-        heapq.heappush(heap, [-(least-dijk(start, n, dest)), id, least, dest])
-    
     if command[0] == 300:
         target = command[1]
-        for idx, h in enumerate(heap):
-            if h[1] == target:
-                heap.remove(heap[idx])
-        heapq.heapify(heap)
-    
+        if target in possible_set or impossible_set:
+            ban.add(target)
+        impossible_set.discard(target)
+        possible_set.discard(target)
+        
     if command[0] == 400:
-        if heap:
-            info = heap[0]
-            value = -info[0]
-            id = info[1]
-            if value < 0:
-                print(-1)
-            else:
+        temp = []
+        while possible:
+            profit, id, least, dest = heapq.heappop(possible)
+            if id in ban:
+                continue
+            if id in possible_set:
                 print(id)
-                heapq.heappop(heap)
+                possible_set.discard(id)
+                ban.add(id)
+                break
+            else:
+                temp.append((profit, id, least, dest))
         else:
             print(-1)
-    if command[0] == 500:
-        new_start = command[1]
-        temp = []
-        while heap:
-            info = heapq.heappop(heap)
-            id, least, dest = info[1], info[2], info[3]
-            temp.append([-(least-dijk(new_start, n, dest)), id, least, dest])
-        start = new_start
-        heap = []
+        
         for t in temp:
-            heapq.heappush(heap, t)
+            heapq.heappush(possible, t)
+
+    if command[0] == 500:
+        start = command[1]
+        distance_cache.clear()  # 새로운 시작 노드에 대한 캐시 초기화
+        temp = [] 
+        temp_impossible = []
+        possible_set, impossible_set = set(), set()
+        for sales in (possible, impossible):
+            for _, id, least, dest in sales:
+                if id in ban:
+                    continue
+                profit = least - dijkstra(start, n, dest)
+                if profit >= 0:
+                    heapq.heappush(temp, (-profit, id, least, dest))
+                    possible_set.add(id)
+                else:
+                    temp_impossible.append((-profit, id, least, dest))
+                    impossible_set.add(id)
+        
+        possible = temp
+        impossible = temp_impossible
