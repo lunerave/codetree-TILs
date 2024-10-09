@@ -76,7 +76,9 @@ def move_possible(bodies, direction):
         ny = y + dy[direction]
 
         if 0 <= nx < l and 0 <= ny < l:
-            if nights[nx][ny] == 0 or nights[nx][ny] == nights[x][y]:
+            if nights[nx][ny] == nights[x][y]:
+                continue
+            if nights[nx][ny] == 0:
                 if not walls_check(nx, ny):
                     return False
             else:
