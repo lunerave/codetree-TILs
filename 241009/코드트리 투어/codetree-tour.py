@@ -4,7 +4,7 @@ import heapq
 Q = int(input())
 
 def dijkstra(start):
-    distance = defaultdict(lambda: 2**31)
+    distance = defaultdict(lambda: 1e9)
     distance[start] = 0
     q = [(0, start)]  # (distance, node)
 
