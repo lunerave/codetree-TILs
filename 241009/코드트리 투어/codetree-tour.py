@@ -11,9 +11,6 @@ def dijkstra(start):
     while q:
         c, node = heapq.heappop(q)
 
-        if c < distance[node]:
-            continue  # 이미 최단 거리로 갱신된 경우
-
         for nnode, w in nodes[node]:
             if c + w < distance[nnode]:
                 distance[nnode] = c + w
