@@ -1,9 +1,10 @@
+from collections import defaultdict
 import heapq
 
 Q = int(input())
 
-def dijkstra(start, n, dest):
-    distance = [float('inf')] * n
+def dijkstra(start):
+    distance = defaultdict(lambda: 2**31)
     distance[start] = 0
     q = [(0, start)]  # (distance, node)
 
@@ -18,11 +19,10 @@ def dijkstra(start, n, dest):
                 distance[nnode] = c + w
                 heapq.heappush(q, (c + w, nnode))
     
-    return distance[dest]
+    return distance
 
 heap = []
 start = 0
-distance_cache = {}  # 캐시를 사용하여 계산된 거리를 저장
 possible, impossible = [], []
 possible_set, impossible_set = set(), set()
 ban = set()
@@ -41,15 +41,14 @@ for _ in range(Q):
             nodes[s].append((e, w))
             if s != e:
                 nodes[e].append((s, w))
+    
+        distances = dijkstra(start)
 
     if command[0] == 200:
         id, least, dest = command[1], command[2], command[3]
         
         # 만약 dest에 대한 거리 계산이 이미 존재한다면 캐시에서 사용
-        if (start, dest) not in distance_cache:
-            distance_cache[(start, dest)] = dijkstra(start, n, dest)
-        
-        distance = distance_cache[(start, dest)]
+        distance = distances[dest]
         benefit = least - distance
         if benefit >= 0:
             heapq.heappush(possible, (-benefit, id, least, dest))
@@ -86,7 +85,7 @@ for _ in range(Q):
 
     if command[0] == 500:
         start = command[1]
-        distance_cache.clear()  # 새로운 시작 노드에 대한 캐시 초기화
+        distances = dijkstra(start)
         temp = [] 
         temp_impossible = []
         possible_set, impossible_set = set(), set()
@@ -94,7 +93,7 @@ for _ in range(Q):
             for _, id, least, dest in sales:
                 if id in ban:
                     continue
-                profit = least - dijkstra(start, n, dest)
+                profit = least - distances[dest]
                 if profit >= 0:
                     heapq.heappush(temp, (-profit, id, least, dest))
                     possible_set.add(id)
