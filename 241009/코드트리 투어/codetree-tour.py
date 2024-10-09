@@ -51,12 +51,12 @@ for _ in range(Q):
             heapq.heappush(possible, (-benefit, id, least, dest))
             possible_set.add(id)
         else:
-            heapq.heappush(impossible, (-benefit, id, least, dest))
+            impossible.append((-benefit, id, least, dest))
             impossible_set.add(id)
 
     if command[0] == 300:
         target = command[1]
-        if target in possible_set or impossible_set:
+        if target in possible_set or target in impossible_set:
             ban.add(target)
         impossible_set.discard(target)
         possible_set.discard(target)
