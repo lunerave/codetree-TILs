@@ -72,13 +72,13 @@ for _ in range(Q):
                 possible_set.discard(id)
                 ban.add(id)
                 break
-            else:
-                temp.append((profit, id, least, dest))
+            # else:
+            #     temp.append((profit, id, least, dest))
         else:
             print(-1)
         
-        for t in temp:
-            heapq.heappush(possible, t)
+        # for t in temp:
+        #     heapq.heappush(possible, t)
 
     if command[0] == 500:
         start = command[1]
