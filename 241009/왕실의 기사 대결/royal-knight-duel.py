@@ -39,6 +39,7 @@ for i in range(1, n+1):
             nights[nx][ny] = i
 
 
+
 def bfs(sx, sy):
     temp = []
     temp.append((sx, sy))
@@ -71,6 +72,8 @@ def walls_check(x, y):
 def move_possible(bodies, direction):
     global save
 
+    temp = []
+
     for x, y in bodies:
         nx = x + dx[direction]
         ny = y + dy[direction]
@@ -85,27 +88,28 @@ def move_possible(bodies, direction):
                 if nights[nx][ny] in save:
                     continue
                 save.append((nights[nx][ny]))    
-                next_bodies = bfs(nx, ny)
-                res = move_possible(next_bodies, direction)
-                if not res:
-                    return False
+                temp.append((nx, ny))
         else:
+            return False
+    
+    for t in temp:
+        next_bodies = bfs(t[0], t[1])
+        res = move_possible(next_bodies, direction)
+        if not res:
             return False
     
     return True
 
 def remove_night(night):
+    bodies = []
     for i in range(l):
         for j in range(l):
             if nights[i][j] == night:
                 bodies = bfs(i, j)
-    
     for x, y in bodies:
         nights[x][y] = 0
-
-
         
-for _ in range(q):
+for t in range(q):
     night_num, direction = map(int, input().split())
 
     origin_bodies = []
@@ -148,8 +152,6 @@ for _ in range(q):
             nights[nx][ny] = s
             if traps_and_walls[nx][ny] == 1:
                 nights_health[s] -= 1
-        if nights_health[s] <= 0:
-            remove_night(s)
 
     for x, y in origin_bodies:
         nights[x][y] = 0
@@ -159,10 +161,14 @@ for _ in range(q):
         ny = y + dy[direction]
 
         nights[nx][ny] = night_num
+    
+    for i in range(1, n+1):
+        if nights_health[i] <= 0:
+            remove_night(i)
 
 
 for i in range(1, n+1):
     if nights_health[i] > 0:
-        answer += origin_hp[i] -nights_health[i]
+        answer += origin_hp[i]-nights_health[i]
 
 print(answer)
