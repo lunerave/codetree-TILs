@@ -4,14 +4,14 @@ import heapq
 Q = int(input())
 
 def dijkstra(start):
-    distance = defaultdict(lambda: 1e9)
+    distance = defaultdict(lambda: 2**31)
     distance[start] = 0
     q = [(0, start)]  # (distance, node)
 
     while q:
         c, node = heapq.heappop(q)
 
-        if c > distance[node]:
+        if c < distance[node]:
             continue  # 이미 최단 거리로 갱신된 경우
 
         for nnode, w in nodes[node]:
