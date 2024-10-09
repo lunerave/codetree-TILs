@@ -18,6 +18,8 @@ for _ in range(Q):
     command = list(input().split(" "))
 
     n = -1
+    x = -1
+    name = -1
 
     if command[0] == '100':
         t, x, name = int(command[1]), int(command[2]), command[3] 
