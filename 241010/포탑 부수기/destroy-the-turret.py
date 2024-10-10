@@ -113,9 +113,6 @@ for turn in range(1, k+1):
             nx = max_x + dx[d]
             ny = max_y + dy[d]
 
-            if nx == min_x and ny == min_y:
-                continue
-
             if nx < 0:
                 nx = n-1
             if ny < 0:
@@ -124,6 +121,9 @@ for turn in range(1, k+1):
                 nx = 0
             if ny == m:
                 ny = 0
+
+            if nx == min_x and ny == min_y:
+                continue
 
             if towers[nx][ny] == 0:
                 continue
