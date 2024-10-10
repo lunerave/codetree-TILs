@@ -112,7 +112,7 @@ for turn in range(k):
     
     for i in range(n):
         for j in range(m):
-            if (i, j) not in res and towers[i][j] != 0:
+            if (i, j) not in res and towers[i][j] != 0 and not (i == min_x and j == min_y):
                 towers[i][j] += 1
 
 answer = 0
