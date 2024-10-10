@@ -7,6 +7,8 @@ dy = [0, 0, 1, -1]
 
 board = []
 
+people_num = set()
+
 for _ in range(n):
     board.append(list(map(int, input().split())))
 
@@ -15,6 +17,7 @@ for _ in range(m):
     x -= 1
     y -= 1
 
+    people_num.add((x, y))
     board[x][y] = -1
 
 ex, ey = map(int, input().split())
@@ -79,7 +82,9 @@ def rotate(x, y, length):
 
 answer = 0
 
-for _ in range(k):
+for k in range(k):
+
+    is_people = 0
 
     people = []
 
@@ -101,6 +106,17 @@ for _ in range(k):
         else:
             board[x][y] = -1
     
+    for i in range(n):
+        for j in range(n):
+            if board[i][j] == -1:
+                is_people = 1
+                break
+        if is_people:
+            break
+    
+    if not is_people:
+        break
+
     tx, ty, length = find_square()
 
     rotate(tx, ty, length)
