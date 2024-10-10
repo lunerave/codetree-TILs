@@ -100,10 +100,8 @@ for _ in range(k):
         if board[x][y] == -100:
             continue
         else:
-            board[x][y] = num
+            board[x][y] += num
 
-        
-    
     for i in range(n):
         for j in range(n):
             if board[i][j] < 0 and board[i][j] != -100:
