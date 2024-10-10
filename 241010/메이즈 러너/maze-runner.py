@@ -96,11 +96,13 @@ for _ in range(k):
         board[x][y] = 0
 
     for x, y, num in moved:
+        answer += -num
         if board[x][y] == -100:
             continue
         else:
             board[x][y] = num
-        answer += -num
+
+        
     
     for i in range(n):
         for j in range(n):
