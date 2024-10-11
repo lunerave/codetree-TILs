@@ -97,14 +97,19 @@ while True:
     t += 1
 
     if moving_people:
+        temp = []
         for _ in range(len(moving_people)):
             sx, sy, tx, ty = moving_people.popleft()
             nsx, nsy = to_stop_by(sx, sy, tx, ty)
             if nsx == tx and nsy == ty:
-                visited_stop_by.append((nsx, nsy))
+                temp.append((nsx, nsy))
                 in_stop_by += 1
             else:
                 moving_people.append((nsx, nsy, tx, ty))
+        
+        if temp:
+            for temp_x, temp_y in temp:
+                visited_stop_by.append((temp_x, temp_y))
 
     if t <= m:
         bx, by = find_basecamp(stop_by[t-1][0], stop_by[t-1][1])
