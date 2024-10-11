@@ -31,16 +31,23 @@ t = 0
 in_stop_by = 0
 
 def find_basecamp(sx, sy):
+    temp = []
     visited = [[0]*n for _ in range(n)]
     visited[sx][sy] = 1
     q= deque()
-    q.append((sx, sy))
+    q.append((sx, sy, 0))
+    min_value = 2**31
 
     while q:
-        x, y = q.popleft()
+        x, y, c = q.popleft()
 
         if (x, y) in basecamp:
-            return x, y
+            if min_value > c:
+                temp = []
+                temp.append((x, y))
+                min_value = c
+            elif min_value == c:
+                temp.append((x, y))
 
         for d in range(4):
             nx = x + dx[d]
@@ -52,8 +59,14 @@ def find_basecamp(sx, sy):
                 
                 if (nx, ny) in visited_stop_by:
                     continue
+                
+                nc = c + 1
                 visited[nx][ny] = 1
-                q.append((nx, ny))
+                q.append((nx, ny, nc))
+    
+    temp.sort(key = lambda x: (x[0], x[1]))
+
+    return temp[0][0], temp[0][1]
             
 moving_people = deque()
 
@@ -90,7 +103,6 @@ def to_stop_by(sx, sy, tx, ty):
                 q.append((nx, ny, nnsx, nnsy))
             
     
-
 while True:
     if in_stop_by == m:
         break
